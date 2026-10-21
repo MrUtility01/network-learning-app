@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.NetworkLearning" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#2C4A3E</item>
-        <item name="colorPrimaryVariant">#1E332B</item>
-        <item name="colorOnPrimary">#F4F1EA</item>
-        <item name="android:statusBarColor">#2C4A3E</item>
-        <item name="android:navigationBarColor">#2C4A3E</item>
-    </style>
+  <style name="Theme.NetworkLearning" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <item name="colorPrimary">#2C4A3E</item>
+    <item name="android:statusBarColor">#2C4A3E</item>
+  </style>
 </resources>
