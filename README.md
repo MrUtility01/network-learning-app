@@ -1,64 +1,90 @@
 # دانشنامه جامع شبکه — Network Learning App
 
-**نسخه:** ۰.۴.۱  
+**مسیر اصلی: نسخهٔ ویندوز ۰.۴.۳**  
 **سازنده:** مهندس مسعود جوکار  
 **مخزن:** [MrUtility01/network-learning-app](https://github.com/MrUtility01/network-learning-app)
 
-برنامهٔ محلی یادگیری شبکه (FastAPI + SQLite + رابط فارسی RTL) با پشتیبانی ویندوز، لینوکس/مک، **PWA اندروید** و پروژهٔ **APK WebView**.
+برنامهٔ **محلی** یادگیری شبکه (FastAPI + SQLite + رابط فارسی RTL).
+توسعه و توزیع رسمی از **ویندوز** جلو می‌رود؛ اندروید در این مخزن به‌صورت همراه (PWA / WebView) است.
 
-## قابلیت‌های نسخهٔ ۰.۴.۱
+---
 
-- ۲۹ فصل پایه + بستهٔ عمیق فصل ۱ + نمونهٔ فصل ۲۱
-- درس، فلش‌کارت، سؤال (کلید فقط سمت سرور)، دستور، آزمایشگاه
-- مدیریت و تأیید محتوا، عملیات گروهی، Import چندفصلی
-- برنامه‌ریز شمسی، کارها، زمان‌سنج، گزارش، پشتیبان/بازیابی
-- PWA قابل نصب روی اندروید + اسکلت پروژهٔ Android Studio
+## دانلود نسخهٔ کامل ویندوز (۰.۴.۳)
 
-## ویندوز
+**فایل آماده:**
 
-1. Python 3.10+  
-2. استخراج و اجرای `run_windows.bat`  
+https://github.com/MrUtility01/network-learning-app/raw/main/new/Network_Learning_App_v0.4.3_FA.zip
+
+**پوشهٔ بسته‌ها و فصل‌ها:**
+
+https://github.com/MrUtility01/network-learning-app/tree/main/new
+
+### اجرا روی ویندوز
+
+1. ZIP را استخراج کن  
+2. `run_windows.bat`  
 3. مرورگر: `http://127.0.0.1:8000`  
 4. در اولین اجرا رمز محلی (حداقل ۱۲ نویسه)
 
-لینوکس/مک: `./start_linux_mac.sh`
+همراه نصب: content_pack فصل‌های **۱، ۲۱، ۳۰، ۳۱، ۳۲**  
+سایر فصل‌ها از ZIPهای داخل `new/` با **واردکردن محتوا**
 
-## اندروید
+---
 
-### سریع (PWA)
-1. سرور را روی رایانه روشن کن.  
-2. IP رایانه را پیدا کن.  
-3. در Chrome گوشی: `http://IP:8000` → Add to Home screen.
+## قابلیت‌های مسیر ویندوز
 
-### APK
-پوشهٔ `android/` را در Android Studio باز کن و Debug APK بساز. راهنما: [`android/README_FA.md`](android/README_FA.md)
+- فهرست ۳۲ فصل + محتوا عمیق منتخب  
+- درس، فلش‌کارت، سؤال، دستور، آزمایشگاه  
+- مدیریت و تأیید محتوا، Import فصل  
+- برنامه‌ریز شمسی، کارها، مرور، گزارش  
+- پشتیبان / بازیابی محلی
 
-## ساخت فصل جدید
+---
 
-از [`Chapter_Authoring_Kit/`](Chapter_Authoring_Kit/) استفاده کن. قالب برای ویندوز و اندروید **یکسان** است.
+## اندروید (همراه نسخهٔ ویندوز — نه جایگزین)
 
-```bash
-python Chapter_Authoring_Kit/scripts/validate_chapter_pack.py path/to/chapter_folder
-```
+### ۱) PWA (پیشنهادی با همان سرور ویندوز)
+1. سرور ویندوز روشن باشد  
+2. در Chrome گوشی: `http://IP-رایانه:8000`  
+3. Add to Home screen
 
-سپس ZIP را از داخل برنامه Import و در «مدیریت و تأیید محتوا» بررسی کن.
+### ۲) WebView به سرور ویندوز
+پوشهٔ [`android/`](android/) — کلاینت به `http://IP:8000` وصل می‌شود.
 
-## ساختار
+### ۳) اپ بومی جدا (مخزن NetworkAll)
+اگر APK کاملاً مستقل می‌خواهی (بدون ویندوز):
+
+- مخزن: https://github.com/MrUtility01/NetworkAll  
+- آخرین ساخت موفق APK: https://github.com/MrUtility01/NetworkAll/actions/runs/39691473803  
+  (Artifacts → `EngineerJokar-APK-v1`)
+
+> در **این** مخزن (`network-learning-app`) مسیر رسمی = **ویندوز ۰.۴.۳**.
+
+---
+
+## ساخت فصل
+
+[`Chapter_Authoring_Kit/`](Chapter_Authoring_Kit/) — قالب برای Import در برنامهٔ ویندوز یکسان است.
+
+---
+
+## ساختار مخزن
 
 | مسیر | توضیح |
 |------|--------|
-| `app.py` | API و پایگاه داده |
-| `static/` | UI + PWA (`manifest.webmanifest`, `sw.js`) |
-| `content_pack/` | فصل ۱ و نمونهٔ ۲۱ |
-| `Chapter_Authoring_Kit/` | قالب و اعتبارسنج فصل |
-| `android/` | پروژهٔ WebView اندروید |
-| `data/` | SQLite و رسانه (پس از اجرا) |
+| `new/` | **نسخهٔ کامل ویندوز ۰.۴.۳ + ZIP فصل‌ها** |
+| `run_windows.bat` | اجراگر ویندوز (نسخهٔ سبک ریشه) |
+| `static/` | UI + PWA |
+| `android/` | WebView وابسته به سرور ویندوز |
+| `android_standalone/` | اسکلت Chaquopy (آزمایشی) |
+| `Chapter_Authoring_Kit/` | ساخت فصل |
+
+---
 
 ## امنیت
 
-- فقط استفادهٔ محلی؛ برای اینترنت عمومی TLS و سخت‌سازی لازم است.
-- محتوای Ethical Hacking باید دفاعی و قانونی باشد: `SECURITY_AND_ETHICAL_HACKING_FA.md`
+فقط استفادهٔ محلی. Ethical Hacking فقط دفاعی و قانونی: `SECURITY_AND_ETHICAL_HACKING_FA.md`
 
-## مجوز و مسئولیت
+## وضعیت
 
-نمونهٔ آموزشی محلی است. صحت عملیاتی دستورات روی همهٔ نسخه‌های تجهیزات تضمین نشده؛ قبل از محیط عملیاتی بازبینی کن.
+جزئیات به‌روز: [`STATUS_WINDOWS_FIRST_FA.md`](STATUS_WINDOWS_FIRST_FA.md)
