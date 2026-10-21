@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">دانشنامه شبکه</string>
+    <string name="server_hint">آدرس سرور محلی (مثلاً http://192.168.1.10:8000)</string>
+    <string name="connect">اتصال</string>
+    <string name="offline_msg">سرور در دسترس نیست. برنامه را روی ویندوز اجرا کن و IP را وارد کن.</string>
+</resources>
