@@ -1,0 +1,5 @@
+Network Learning App
+Version: 0.4.1
+Platforms: Windows, Linux/macOS, Android PWA, Android WebView APK scaffold
+Includes: content review, bulk chapter ops, Jalali planner, tasks, reports, backup/restore, PWA
+Local-only educational prototype
