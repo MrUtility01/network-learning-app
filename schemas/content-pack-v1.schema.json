@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://network-learning-app.local/schemas/content-pack-v1.json",
+  "title": "Network Learning App - Multi-topic Content Pack",
+  "description": "Portable, versioned content pack. Importers must preserve existing IDs/progress and must never silently delete or overwrite existing content.",
+  "type": "object",
+  "required": ["schema_version", "pack", "topic", "chapters"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "pack": {
+      "type": "object",
+      "required": ["id", "title", "language", "created_at", "generator"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "default": "fa-IR" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "generator": { "type": "string" },
+        "description": { "type": "string" },
+        "source_pack_id": { "type": ["string", "null"] },
+        "revision": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "additionalProperties": true
+    },
+    "topic": {
+      "type": "object",
+      "required": ["id", "title", "content_profile", "features"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "icon": { "type": ["string", "null"] },
+        "color": { "type": ["string", "null"] },
+        "content_profile": { "enum": ["it", "school", "hawza", "books", "general", "custom"] },
+        "features": {
+          "type": "object",
+          "properties": {
+            "chapters": { "type": "boolean", "default": true },
+            "lessons": { "type": "boolean", "default": true },
+            "notes": { "type": "boolean", "default": true },
+            "questions": { "type": "boolean", "default": true },
+            "examples": { "type": "boolean", "default": true },
+            "commands": { "type": "boolean", "default": false },
+            "practical_labs": { "type": "boolean", "default": false },
+            "images": { "type": "boolean", "default": true },
+            "sources": { "type": "boolean", "default": true },
+            "flashcards": { "type": "boolean", "default": true },
+            "review": { "type": "boolean", "default": true },
+            "planner": { "type": "boolean", "default": true },
+            "exams": { "type": "boolean", "default": true },
+            "attachments": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        },
+        "review_policy": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "daily_item_goal": { "type": "integer", "minimum": 0, "default": 20 },
+            "daily_minutes_goal": { "type": "integer", "minimum": 0, "default": 30 },
+            "interval_days": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "default": [1, 3, 7, 14, 30] },
+            "reminder_times": { "type": "array", "items": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" } }
+          },
+          "additionalProperties": true
+        },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "number", "title", "sections"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "number": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "learning_objectives": { "type": "array", "items": { "type": "string" } },
+          "estimated_minutes": { "type": "integer", "minimum": 0 },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "content_type"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "title": { "type": "string", "minLength": 1 },
+                "content_type": { "enum": ["lesson", "note", "question", "example", "command", "lab", "source", "flashcard", "image", "attachment", "summary"] },
+                "body_markdown": { "type": "string" },
+                "difficulty": { "enum": ["beginner", "intermediate", "advanced"] },
+                "tags": { "type": "array", "items": { "type": "string" } },
+                "estimated_minutes": { "type": "integer", "minimum": 0 },
+                "approval_status": { "enum": ["draft", "pending", "approved", "rejected"], "default": "pending" },
+                "review": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": { "type": "boolean", "default": true },
+                    "importance": { "enum": ["low", "normal", "high"], "default": "normal" },
+                    "answer": { "type": "string" },
+                    "explanation": { "type": "string" }
+                  },
+                  "additionalProperties": true
+                },
+                "examples": { "type": "array", "items": { "type": "object" } },
+                "questions": { "type": "array", "items": { "type": "object" } },
+                "commands": { "type": "array", "items": { "type": "object" } },
+                "labs": { "type": "array", "items": { "type": "object" } },
+                "images": { "type": "array", "items": { "type": "object", "properties": { "path": { "type": "string" }, "alt": { "type": "string" }, "caption": { "type": "string" }, "source": { "type": "string" } }, "required": ["path"] } },
+                "sources": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "author": { "type": "string" }, "publisher": { "type": "string" }, "edition": { "type": "string" }, "volume": { "type": ["string", "integer"] }, "page": { "type": ["string", "integer"] }, "url": { "type": "string" }, "accessed_at": { "type": "string" } } },
+                "metadata": { "type": "object" }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "generation": {
+      "type": "object",
+      "properties": {
+        "requested_chapter_count": { "type": "integer", "minimum": 1 },
+        "target_counts": {
+          "type": "object",
+          "properties": {
+            "lessons_per_chapter": { "type": "integer", "minimum": 0 },
+            "notes_per_chapter": { "type": "integer", "minimum": 0 },
+            "questions_per_chapter": { "type": "integer", "minimum": 0 },
+            "examples_per_chapter": { "type": "integer", "minimum": 0 },
+            "commands_per_chapter": { "type": "integer", "minimum": 0 },
+            "labs_per_chapter": { "type": "integer", "minimum": 0 },
+            "images_per_chapter": { "type": "integer", "minimum": 0 },
+            "sources_per_chapter": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "prompt": { "type": "string" },
+        "prompt_revision": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
