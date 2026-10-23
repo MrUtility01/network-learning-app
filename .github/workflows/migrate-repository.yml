@@ -1,0 +1,147 @@
+name: Rebuild repository as DaneshNegar v1.0.0
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "bootstrap-parts/source-bundle-*.txt"
+      - ".github/workflows/migrate-repository.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  test-build-and-clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repository and staged source fragments
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify the new project archive
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find bootstrap-parts -maxdepth 1 -type f -name 'source-bundle-*.txt' | wc -l)" -eq 17
+          cat bootstrap-parts/source-bundle-*.txt | tr -d '\r\n' | base64 --decode > "$RUNNER_TEMP/KnowledgeStudio.tar.gz"
+          echo "4f85cf1dfea4920afee58615c02a3f4a3ab7546e42801f2dcfe10284b64fc809  $RUNNER_TEMP/KnowledgeStudio.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/source"
+          tar -xzf "$RUNNER_TEMP/KnowledgeStudio.tar.gz" -C "$RUNNER_TEMP/source"
+          test -s "$RUNNER_TEMP/source/KnowledgeStudio/app.py"
+          echo "src=$RUNNER_TEMP/source/KnowledgeStudio" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test the fresh generic data model
+        working-directory: ${{ steps.source.outputs.src }}
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements.txt
+          python -m py_compile app.py
+          python -m unittest discover -s tests -v
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Set up required Android SDK packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKMGR="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print | sort | tail -n 1)"
+          test -n "$SDKMGR"
+          yes | "$SDKMGR" --licenses >/dev/null 2>&1 || true
+          "$SDKMGR" --install "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+
+      - name: Synchronize packaged Android UI and verify launcher icon
+        working-directory: ${{ steps.source.outputs.src }}
+        run: |
+          set -euo pipefail
+          cp static/index.html android/app/src/main/assets/index.html
+          mkdir -p android/app/src/main/assets/static
+          cp static/favicon-32x32.png android/app/src/main/assets/static/favicon-32x32.png
+          test -s android/app/src/main/res/drawable-nodpi/ic_launcher.png
+          grep -q 'android:icon="@drawable/ic_launcher"' android/app/src/main/AndroidManifest.xml
+
+      - name: Build installable debug APK
+        working-directory: ${{ steps.source.outputs.src }}/android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Verify APK and save it outside the repository checkout
+        working-directory: ${{ steps.source.outputs.src }}
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          sha256sum "$APK"
+          cp "$APK" "$RUNNER_TEMP/DaneshNegar-Android-v1.0.0-debug.apk"
+
+      - name: Publish installable APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DaneshNegar-Android-v1.0.0-debug
+          path: ${{ runner.temp }}/DaneshNegar-Android-v1.0.0-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Replace the old repository history and root with the new project only
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SRC="${{ steps.source.outputs.src }}"
+          APK="$RUNNER_TEMP/DaneshNegar-Android-v1.0.0-debug.apk"
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan fresh-daneshnegar-root
+          git clean -fdx
+          cp -a "$SRC/." "$GITHUB_WORKSPACE/"
+          rm -rf bootstrap-parts
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          find . -type f -name '*.pyc' -delete
+          test -s app.py
+          test -s README_FA.md
+          test -s android/app/src/main/res/drawable-nodpi/ic_launcher.png
+          test ! -e new
+          test ! -e Chapter_Authoring_Kit
+          git add -A
+          git commit -m "Initial commit: DaneshNegar generic knowledge platform v1.0.0"
+          git push --force origin HEAD:main
+          echo "Clean root pushed to main: $(git rev-parse HEAD)"
+
+      - name: Remove old tags, releases, and non-main branches
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          REPO="$GITHUB_REPOSITORY"
+          gh api --paginate "repos/$REPO/releases" --jq '.[].id' 2>/dev/null | while read -r id; do
+            [ -n "$id" ] && gh api --silent --method DELETE "repos/$REPO/releases/$id" >/dev/null 2>&1
+          done
+          gh api --paginate "repos/$REPO/git/matching-refs/tags" --jq '.[].ref' 2>/dev/null | while read -r ref; do
+            [ -n "$ref" ] && gh api --silent --method DELETE "repos/$REPO/git/refs/${ref#refs/}" >/dev/null 2>&1
+          done
+          gh api --paginate "repos/$REPO/branches" --jq '.[].name' 2>/dev/null | while read -r branch; do
+            if [ -n "$branch" ] && [ "$branch" != "main" ]; then
+              gh api --silent --method DELETE "repos/$REPO/git/refs/heads/$branch" >/dev/null 2>&1
+            fi
+          done
