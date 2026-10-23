@@ -20,16 +20,13 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses || true
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
       - name: Build debug APK
         working-directory: android
-        run: |
-          chmod +x ./gradlew 2>/dev/null || true
-          if [ -f ./gradlew ]; then ./gradlew --no-daemon assembleDebug; else
-            echo "Gradle wrapper missing; installing Gradle and building"
-            sudo apt-get update
-            sudo apt-get install -y gradle
-            gradle --no-daemon assembleDebug
-          fi
+        run: gradle --no-daemon assembleDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
