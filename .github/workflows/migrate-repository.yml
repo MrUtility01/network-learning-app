@@ -37,6 +37,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Pin compatible test/runtime dependencies
+        working-directory: ${{ steps.source.outputs.src }}
+        run: |
+          cat > requirements.txt <<'REQ'
+          fastapi>=0.115,<0.120
+          uvicorn[standard]>=0.30,<0.35
+          python-multipart>=0.0.9,<0.1
+          httpx>=0.27,<0.29
+          REQ
+
       - name: Test the fresh generic data model
         working-directory: ${{ steps.source.outputs.src }}
         run: |
