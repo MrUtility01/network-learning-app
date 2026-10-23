@@ -108,7 +108,7 @@
                 "commands": { "type": "array", "items": { "type": "object" } },
                 "labs": { "type": "array", "items": { "type": "object" } },
                 "images": { "type": "array", "items": { "type": "object", "properties": { "path": { "type": "string" }, "alt": { "type": "string" }, "caption": { "type": "string" }, "source": { "type": "string" } }, "required": ["path"] } },
-                "sources": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "author": { "type": "string" }, "publisher": { "type": "string" }, "edition": { "type": "string" }, "volume": { "type": ["string", "integer"] }, "page": { "type": ["string", "integer"] }, "url": { "type": "string" }, "accessed_at": { "type": "string" } } },
+                "sources": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "author": { "type": "string" }, "publisher": { "type": "string" }, "edition": { "type": "string" }, "volume": { "type": ["string", "integer"] }, "page": { "type": ["string", "integer"] }, "url": { "type": "string" }, "accessed_at": { "type": "string" } } } },
                 "metadata": { "type": "object" }
               },
               "additionalProperties": true
